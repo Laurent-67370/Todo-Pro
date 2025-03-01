@@ -1,0 +1,2056 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List Pro</title>
+    <style>
+        :root {
+            /* Couleurs principales */
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --primary-light: #dbeafe;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --gray-light: #f3f4f6;
+            --border-color: #e5e7eb;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --google-red: #DB4437;
+            --google-light: #ffebe9;
+            
+            /* Thème clair par défaut */
+            --bg-main: #f9fafb;
+            --bg-card: #ffffff;
+            --bg-hover: #f3f4f6;
+            --bg-selected: #dbeafe;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Mode sombre */
+        body.dark-theme {
+            --bg-main: #111827;
+            --bg-card: #1f2937;
+            --bg-hover: #374151;
+            --bg-selected: #2563eb;
+            --text-dark: #f9fafb;
+            --text-light: #d1d5db;
+            --gray-light: #374151;
+            --border-color: #4b5563;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            --primary-light: #1e40af;
+            --google-light: #5e1d19;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-dark);
+            line-height: 1.5;
+            transition: background-color 0.3s ease;
+        }
+        
+        /* Conteneur principal */
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 16px;
+        }
+        
+        /* En-tête de l'application */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 16px;
+            background-color: var(--bg-card);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+        
+        .app-title {
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-title h1 {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--text-dark);
+            margin-left: 8px;
+        }
+        
+        .app-logo {
+            font-size: 28px;
+            margin-right: 10px;
+        }
+        
+        .app-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        /* Boutons d'action */
+        button {
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+        
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+        
+        button.secondary {
+            background-color: var(--gray-light);
+            color: var(--text-dark);
+        }
+        
+        button.secondary:hover {
+            background-color: var(--border-color);
+        }
+        
+        button.google {
+            background-color: var(--google-red);
+        }
+        
+        button.google:hover {
+            background-color: #c13a2f;
+        }
+        
+        button.google-connected {
+            background-color: var(--google-light);
+            color: var(--google-red);
+            font-weight: 600;
+        }
+        
+        button.active {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        body.dark-theme button.active {
+            color: var(--text-dark);
+        }
+        
+        button.danger {
+            background-color: var(--danger);
+        }
+        
+        button.danger:hover {
+            background-color: #dc2626;
+        }
+        
+        button.icon {
+            background: none;
+            color: var(--text-light);
+            padding: 4px;
+            font-size: 16px;
+        }
+        
+        button.icon:hover {
+            background: none;
+            color: var(--text-dark);
+        }
+        
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: var(--text-dark);
+            padding: 4px;
+            border-radius: 4px;
+        }
+        
+        .theme-toggle:hover {
+            background-color: var(--bg-hover);
+        }
+        
+        /* Cartes et conteneurs */
+        .card {
+            background-color: var(--bg-card);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            padding: 16px;
+            margin-bottom: 24px;
+            transition: all 0.2s ease;
+        }
+        
+        .sync-status {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        
+        .sync-status.success {
+            background-color: var(--success-light);
+            color: var(--success);
+        }
+        
+        .sync-status.pending {
+            background-color: var(--warning-light);
+            color: var(--warning);
+        }
+        
+        .sync-status.error {
+            background-color: var(--danger-light);
+            color: var(--danger);
+        }
+        
+        .sync-status i {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        
+        .session-notice {
+            background-color: var(--warning-light);
+            border-left: 4px solid var(--warning);
+            padding: 12px 16px;
+            margin-bottom: 24px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #92400e;
+        }
+        
+        body.dark-theme .session-notice {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: #fbbf24;
+        }
+        
+        /* Formulaires */
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: var(--text-dark);
+        }
+        
+        input[type="text"], 
+        input[type="date"],
+        input[type="time"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 16px;
+            outline: none;
+            background-color: var(--bg-card);
+            color: var(--text-dark);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        input[type="text"]:focus, 
+        input[type="date"]:focus,
+        input[type="time"]:focus,
+        input[type="number"]:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+        
+        body.dark-theme input,
+        body.dark-theme select,
+        body.dark-theme textarea {
+            background-color: var(--gray-light);
+        }
+        
+        .add-form {
+            margin-bottom: 4px;
+        }
+        
+        .add-form-expanded {
+            margin-top: 12px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .form-col {
+            flex: 1;
+        }
+        
+        /* Sélecteur pour le partage et la synchronisation */
+        .sync-options {
+            display: flex;
+            align-items: center;
+            margin-top: 8px;
+        }
+        
+        .sync-checkbox {
+            margin-right: 8px;
+        }
+        
+        .sync-label {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+        
+        .sync-icon {
+            margin-left: 6px;
+            color: var(--google-red);
+        }
+        
+        /* Tags */
+        .tags-input {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            min-height: 40px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 4px 8px;
+        }
+        
+        .tags-input:focus-within {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+        
+        .tag {
+            display: flex;
+            align-items: center;
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 16px;
+        }
+        
+        body.dark-theme .tag {
+            background-color: var(--gray-light);
+        }
+        
+        .tag-remove {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-left: 4px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+        }
+        
+        .tag-remove:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        .tags-input input {
+            flex: 1;
+            min-width: 60px;
+            border: none;
+            outline: none;
+            padding: 4px;
+            background: transparent;
+            color: var(--text-dark);
+        }
+        
+        /* Toggle formulaire */
+        .toggle-form-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            font-size: 14px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            width: 100%;
+            padding: 4px;
+        }
+        
+        .toggle-form-btn:hover {
+            background: none;
+            color: var(--text-dark);
+        }
+        
+        .toggle-form-btn i {
+            margin-left: 4px;
+            transition: transform 0.3s ease;
+        }
+        
+        .toggle-form-btn.expanded i {
+            transform: rotate(180deg);
+        }
+        
+        /* Recherche et filtres */
+        .search-bar {
+            position: relative;
+            margin-bottom: 16px;
+        }
+        
+        .search-bar input {
+            padding-left: 36px;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+        
+        .filters {
+            background-color: var(--bg-card);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+        
+        .filters-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .filters-title {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .filters-toggle {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 4px;
+        }
+        
+        .filters-toggle:hover {
+            color: var(--text-dark);
+        }
+        
+        .filters-content {
+            display: block;
+            transition: max-height 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .filters-content.collapsed {
+            max-height: 0;
+        }
+        
+        .filters-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        @media (max-width: 600px) {
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                flex-direction: column;
+            }
+        }
+        
+        .filter-section {
+            margin-bottom: 16px;
+        }
+        
+        .filter-section h3 {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        
+        /* Sélecteur de vue */
+        .view-switcher {
+            display: flex;
+            margin-bottom: 16px;
+            overflow: hidden;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .view-option {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            background-color: var(--bg-card);
+            border: none;
+            border-right: 1px solid var(--border-color);
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .view-option:last-child {
+            border-right: none;
+        }
+        
+        .view-option.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        /* Vue liste */
+        .todo-list {
+            list-style: none;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px var(--shadow-color);
+            background-color: var(--bg-card);
+        }
+        
+        .todo-item {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: flex-start;
+            transition: background-color 0.2s ease;
+        }
+        
+        .todo-item:last-child {
+            border-bottom: none;
+        }
+        
+        .todo-item:hover {
+            background-color: var(--bg-hover);
+        }
+        
+        .todo-item.overdue {
+            border-left: 4px solid var(--danger);
+        }
+        
+        .todo-item.almost-due {
+            border-left: 4px solid var(--warning);
+        }
+        
+        .todo-item.synced {
+            border-right: 4px solid var(--google-red);
+        }
+        
+        .todo-checkbox {
+            margin-right: 12px;
+            margin-top: 4px;
+            height: 18px;
+            width: 18px;
+            cursor: pointer;
+            accent-color: var(--primary-color);
+        }
+        
+        .todo-content {
+            flex-grow: 1;
+        }
+        
+        .todo-text {
+            font-weight: 500;
+            margin-bottom: 4px;
+            cursor: pointer;
+            color: var(--text-dark);
+        }
+        
+        .todo-text.completed {
+            text-decoration: line-through;
+            color: var(--text-light);
+        }
+        
+        .todo-description {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 4px;
+            white-space: pre-line;
+        }
+        
+        .todo-meta {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+        
+        .todo-tag {
+            display: flex;
+            align-items: center;
+            background-color: var(--gray-light);
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 16px;
+            color: var(--text-dark);
+        }
+        
+        .todo-tag.synced {
+            background-color: var(--google-light);
+            color: var(--google-red);
+        }
+        
+        .todo-tag.category {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+        }
+        
+        body.dark-theme .todo-tag.category {
+            color: var(--text-dark);
+        }
+        
+        .todo-tag.overdue {
+            color: var(--danger);
+        }
+        
+        .todo-tag.priority-high {
+            color: var(--danger);
+            background-color: var(--danger-light);
+        }
+        
+        .todo-tag.priority-medium {
+            color: var(--warning);
+            background-color: var(--warning-light);
+        }
+        
+        .todo-tag.priority-low {
+            color: var(--success);
+            background-color: var(--success-light);
+        }
+        
+        body.dark-theme .todo-tag.priority-high {
+            background-color: rgba(239, 68, 68, 0.2);
+        }
+        
+        body.dark-theme .todo-tag.priority-medium {
+            background-color: rgba(245, 158, 11, 0.2);
+        }
+        
+        body.dark-theme .todo-tag.priority-low {
+            background-color: rgba(16, 185, 129, 0.2);
+        }
+        
+        .todo-subtasks {
+            margin: 8px 0 8px 12px;
+            padding-left: 12px;
+            border-left: 2px solid var(--border-color);
+        }
+        
+        .subtask-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+        
+        .subtask-checkbox {
+            margin-right: 8px;
+            accent-color: var(--primary-color);
+        }
+        
+        .subtask-text {
+            flex-grow: 1;
+        }
+        
+        .subtask-text.completed {
+            text-decoration: line-through;
+            color: var(--text-light);
+        }
+        
+        .subtask-actions {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .todo-expand {
+            margin-top: 8px;
+            color: var(--text-light);
+            font-size: 14px;
+            background: none;
+            border: none;
+            padding: 2px 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .todo-expand:hover {
+            color: var(--text-dark);
+        }
+        
+        .todo-expand i {
+            transition: transform 0.2s ease;
+            margin-right: 4px;
+        }
+        
+        .todo-expand.expanded i {
+            transform: rotate(90deg);
+        }
+        
+        .todo-actions {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 4px;
+            font-size: 16px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .action-btn:hover {
+            color: var(--text-dark);
+            background-color: var(--bg-hover);
+        }
+        
+        /* Calendrier */
+        .calendar-view {
+            background-color: var(--bg-card);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px var(--shadow-color);
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .calendar-title {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .calendar-nav {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .calendar-nav-btn {
+            background: none;
+            border: none;
+            color: var(--text-dark);
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+        
+        .calendar-nav-btn:hover {
+            background-color: var(--bg-hover);
+            border-radius: 4px;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+        }
+        
+        .calendar-day-header {
+            text-align: center;
+            padding: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            background-color: var(--bg-main);
+            color: var(--text-light);
+        }
+        
+        .calendar-day {
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            min-height: 100px;
+            background-color: var(--bg-card);
+        }
+        
+        .calendar-day.current-month {
+            background-color: var(--bg-card);
+        }
+        
+        .calendar-day.other-month {
+            background-color: var(--bg-hover);
+            color: var(--text-light);
+        }
+        
+        .calendar-day.today {
+            background-color: var(--primary-light);
+        }
+        
+        .calendar-day-number {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .calendar-events {
+            font-size: 12px;
+        }
+        
+        .calendar-event {
+            margin-bottom: 2px;
+            padding: 2px 4px;
+            background-color: var(--bg-hover);
+            border-radius: 2px;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .calendar-event.priority-high {
+            border-left: 3px solid var(--danger);
+        }
+        
+        .calendar-event.priority-medium {
+            border-left: 3px solid var(--warning);
+        }
+        
+        .calendar-event.priority-low {
+            border-left: 3px solid var(--success);
+        }
+        
+        .calendar-event.synced {
+            border-right: 3px solid var(--google-red);
+        }
+        
+        /* Stats */
+        .stats-view {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-card {
+            background-color: var(--bg-card);
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 1px 3px var(--shadow-color);
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--primary-color);
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+        
+        /* Modal */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+        }
+        
+        .modal-backdrop.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal {
+            background-color: var(--bg-card);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(-20px);
+            transition: transform 0.2s ease;
+        }
+        
+        .modal-backdrop.active .modal {
+            transform: translateY(0);
+        }
+        
+        .modal-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-light);
+            font-size: 20px;
+        }
+        
+        .modal-close:hover {
+            color: var(--text-dark);
+        }
+        
+        .modal-body {
+            padding: 16px;
+        }
+        
+        .modal-footer {
+            padding: 16px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+        
+        /* Google Auth Modal */
+        .google-auth-modal .modal {
+            max-width: 400px;
+        }
+        
+        .google-auth-content {
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .google-logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .google-logo img {
+            width: 50px;
+            height: 50px;
+        }
+        
+        .google-auth-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        
+        .google-auth-description {
+            color: var(--text-light);
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .google-auth-btn {
+            width: 100%;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--google-red);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .google-auth-btn:hover {
+            background-color: #c13a2f;
+        }
+        
+        .google-auth-btn img {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+        
+        .sync-settings-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .sync-settings-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .sync-setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+        }
+        
+        .sync-setting-label {
+            display: flex;
+            align-items: center;
+        }
+        
+        .sync-setting-label i {
+            margin-right: 8px;
+            color: var(--text-light);
+        }
+        
+        .sync-action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 20px;
+        }
+        
+        /* Conflict Resolution Modal */
+        .conflict-list {
+            margin: 16px 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .conflict-item {
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+        
+        .conflict-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .conflict-details {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .conflict-source {
+            flex: 1;
+            padding: 8px;
+            background-color: var(--bg-hover);
+            border-radius: 4px;
+        }
+        
+        .conflict-source-title {
+            font-weight: 500;
+            font-size: 14px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .conflict-source-title i {
+            margin-right: 4px;
+        }
+        
+        .conflict-date {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+        
+        .conflict-text {
+            margin: 4px 0;
+        }
+        
+        .conflict-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 8px;
+        }
+        
+        /* Footer */
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background-color: var(--bg-card);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px var(--shadow-color);
+            color: var(--text-light);
+            font-size: 14px;
+            margin-top: 24px;
+        }
+        
+        .footer-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-light);
+        }
+        
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: var(--border-color);
+        }
+        
+        .empty-state-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+        }
+        
+        .empty-state-text {
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+        
+        /* Tooltips */
+        [data-tooltip] {
+            position: relative;
+        }
+        
+        [data-tooltip]:hover::before {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: calc(100% + 5px);
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 4px 8px;
+            background-color: var(--text-dark);
+            color: white;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 100;
+        }
+        
+        [data-tooltip]:hover::after {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid var(--text-dark);
+            z-index: 100;
+        }
+        
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 16px;
+            background-color: var(--bg-card);
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1100;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            min-width: 300px;
+            max-width: 400px;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+        }
+        
+        .notification.visible {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            border-left: 4px solid var(--success);
+        }
+        
+        .notification.error {
+            border-left: 4px solid var(--danger);
+        }
+        
+        .notification.info {
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .notification.warning {
+            border-left: 4px solid var(--warning);
+        }
+        
+        .notification-icon {
+            margin-right: 12px;
+            font-size: 18px;
+        }
+        
+        .notification-content {
+            flex: 1;
+        }
+        
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        
+        .notification-message {
+            color: var(--text-light);
+        }
+        
+        .notification-close {
+            margin-left: 12px;
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 0;
+        }
+        
+        .notification-close:hover {
+            color: var(--text-dark);
+        }
+        
+        /* Styles pour la documentation */
+        .help-modal .modal {
+            max-width: 900px;
+        }
+        
+        .help-content {
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .help-content h2 {
+            color: var(--primary-color);
+            font-size: 24px;
+            margin: 30px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--primary-light);
+        }
+        
+        .help-content h2:first-child {
+            margin-top: 0;
+        }
+        
+        .help-content h3 {
+            font-size: 18px;
+            margin: 20px 0 10px;
+            color: var(--text-dark);
+        }
+        
+        .help-content ul, .help-content ol {
+            margin-bottom: 20px;
+            padding-left: 25px;
+        }
+        
+        .help-content li {
+            margin-bottom: 8px;
+        }
+        
+        .help-content .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .help-content .feature-card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            background-color: var(--gray-light);
+        }
+        
+        .help-content .feature-card h3 {
+            margin-top: 0;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .help-content .feature-card h3 i {
+            margin-right: 8px;
+            font-size: 20px;
+        }
+        
+        .help-content .tip {
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .help-content .warning {
+            background-color: var(--warning-light);
+            border-left: 4px solid var(--warning);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .help-content .key-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 8px;
+            margin: 2px 5px 2px 0;
+            border-radius: 4px;
+            background-color: var(--gray-light);
+            font-size: 14px;
+        }
+        
+        .help-content .color-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .help-content .red {
+            background-color: var(--danger);
+        }
+        
+        .help-content .orange {
+            background-color: var(--warning);
+        }
+        
+        .help-content .green {
+            background-color: var(--success);
+        }
+        
+        .help-content .blue {
+            background-color: var(--primary-color);
+        }
+        
+        .help-content .google-color {
+            background-color: var(--google-red);
+        }
+        
+        .help-content code {
+            background-color: var(--gray-light);
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
+        /* Table des matières */
+        .help-content .toc {
+            background-color: var(--gray-light);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .help-content .toc h2 {
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .help-content .toc ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .help-content .toc ul ul {
+            padding-left: 20px;
+        }
+        
+        .help-content .toc li {
+            margin-bottom: 5px;
+        }
+        
+        .help-content .toc a {
+            color: var(--primary-color);
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .help-content .toc a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <div class="app-title">
+                <span class="app-logo">📋</span>
+                <h1>Todo List Pro</h1>
+            </div>
+            <div class="app-actions">
+                <button id="sync-google-btn" class="google" data-tooltip="Synchroniser avec Google Agenda">
+                    <span>Google Agenda</span>
+                </button>
+                <button id="help-btn" class="secondary" data-tooltip="Aide">❓</button>
+                <button id="theme-toggle" class="theme-toggle" data-tooltip="Changer de thème">🌙</button>
+                <button id="export-btn" class="secondary" data-tooltip="Exporter les données">
+                    <span>⬇️ Exporter</span>
+                </button>
+                <label for="import-file" id="import-btn" class="secondary" style="cursor:pointer; padding: 8px 16px; display: inline-block;" data-tooltip="Importer des données">
+                    <span>⬆️ Importer</span>
+                </label>
+                <input type="file" id="import-file" accept=".json" style="display:none;">
+            </div>
+        </header>
+
+        <!-- Zone de notification pour le statut de synchronisation -->
+        <div id="sync-status" class="sync-status pending" style="display: none;">
+            <i class="sync-icon">🔄</i>
+            <span id="sync-message">Synchronisation en cours...</span>
+        </div>
+        
+        <div class="session-notice">
+            <strong>Note :</strong> Cette application fonctionne en local. Utilisez la fonction d'export pour sauvegarder vos données ou synchronisez avec Google Agenda pour y accéder depuis n'importe quel appareil.
+        </div>
+        
+        <!-- Statistiques -->
+        <div class="stats-view">
+            <div class="stat-card">
+                <div id="total-tasks" class="stat-value">0</div>
+                <div class="stat-label">Total des tâches</div>
+            </div>
+            <div class="stat-card">
+                <div id="completed-tasks" class="stat-value">0</div>
+                <div class="stat-label">Tâches complétées</div>
+            </div>
+            <div class="stat-card">
+                <div id="overdue-tasks" class="stat-value">0</div>
+                <div class="stat-label">Tâches en retard</div>
+            </div>
+            <div class="stat-card">
+                <div id="completion-rate" class="stat-value">0%</div>
+                <div class="stat-label">Taux de complétion</div>
+            </div>
+        </div>
+        
+        <!-- Formulaire d'ajout compact -->
+        <div class="card add-form">
+            <form id="quick-add-form">
+                <div class="form-group">
+                    <input 
+                        type="text" 
+                        id="todo-text" 
+                        placeholder="Ajouter une nouvelle tâche... (appuyez sur Entrée pour ajouter rapidement)" 
+                        required
+                    />
+                </div>
+            </form>
+            
+            <button id="toggle-form-btn" class="toggle-form-btn">
+                Plus d'options <i>▼</i>
+            </button>
+            
+            <!-- Formulaire d'ajout complet (masqué par défaut) -->
+            <form id="add-todo-form" class="add-form-expanded" style="display:none;">
+                <div class="form-row">
+                    <div class="form-col">
+                        <label for="todo-category">Catégorie</label>
+                        <input 
+                            type="text" 
+                            id="todo-category" 
+                            placeholder="Catégorie (optionnel)" 
+                            list="categories"
+                        />
+                        <datalist id="categories"></datalist>
+                    </div>
+                    
+                    <div class="form-col">
+                        <label for="todo-due-date">Date d'échéance</label>
+                        <input 
+                            type="date" 
+                            id="todo-due-date"
+                        />
+                    </div>
+                    
+                    <div class="form-col">
+                        <label for="todo-priority">Priorité</label>
+                        <select id="todo-priority">
+                            <option value="basse">Basse</option>
+                            <option value="normale" selected>Normale</option>
+                            <option value="haute">Haute</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <label for="todo-time">Heure (optionnel)</label>
+                        <input 
+                            type="time" 
+                            id="todo-time"
+                        />
+                    </div>
+                    
+                    <div class="form-col">
+                        <label for="todo-estimate">Temps estimé (minutes)</label>
+                        <input 
+                            type="number" 
+                            id="todo-estimate"
+                            min="0"
+                            placeholder="Optionnel"
+                        />
+                    </div>
+                    
+                    <div class="form-col">
+                        <label for="todo-recurrence">Récurrence</label>
+                        <select id="todo-recurrence">
+                            <option value="none">Aucune</option>
+                            <option value="daily">Quotidienne</option>
+                            <option value="weekly">Hebdomadaire</option>
+                            <option value="monthly">Mensuelle</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Tags</label>
+                    <div id="tags-input" class="tags-input">
+                        <input type="text" id="new-tag" placeholder="Ajouter des tags (appuyez sur Entrée pour ajouter)">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="todo-description">Description</label>
+                    <textarea 
+                        id="todo-description" 
+                        placeholder="Description détaillée (optionnel)" 
+                        rows="3"
+                    ></textarea>
+                </div>
+                
+                <!-- Option de synchronisation Google -->
+                <div class="sync-options">
+                    <input type="checkbox" id="sync-google-checkbox" class="sync-checkbox" disabled>
+                    <label for="sync-google-checkbox" class="sync-label">
+                        Synchroniser avec Google Agenda
+                        <span class="sync-icon">G</span>
+                    </label>
+                </div>
+                
+                <button type="submit">Ajouter la tâche</button>
+            </form>
+        </div>
+        
+        <!-- Barre de recherche -->
+        <div class="search-bar">
+            <span class="search-icon">🔍</span>
+            <input 
+                type="text" 
+                id="search-input" 
+                placeholder="Rechercher des tâches..." 
+            />
+        </div>
+        
+        <!-- Vue switcher -->
+        <div class="view-switcher">
+            <button class="view-option active" data-view="list">Liste</button>
+            <button class="view-option" data-view="calendar">Calendrier</button>
+        </div>
+        
+        <!-- Filtres -->
+        <div class="filters">
+            <div class="filters-header">
+                <div class="filters-title">Filtres et tri</div>
+                <button id="filters-toggle" class="filters-toggle">▼</button>
+            </div>
+            <div id="filters-content" class="filters-content">
+                <div class="filters-grid">
+                    <div class="filter-section">
+                        <h3>Statut</h3>
+                        <div class="filter-buttons" id="status-filters">
+                            <button class="status-filter active" data-filter="all">Toutes</button>
+                            <button class="status-filter" data-filter="active">Actives</button>
+                            <button class="status-filter" data-filter="completed">Complétées</button>
+                            <button class="status-filter" data-filter="overdue">En retard</button>
+                            <button class="status-filter" data-filter="today">Aujourd'hui</button>
+                            <button class="status-filter" data-filter="synced">Synchronisées</button>
+                        </div>
+                        
+                        <div class="filter-row">
+                            <div class="form-group">
+                                <label for="category-filter">Catégorie</label>
+                                <select id="category-filter">
+                                    <option value="">Toutes</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="priority-filter">Priorité</label>
+                                <select id="priority-filter">
+                                    <option value="">Toutes</option>
+                                    <option value="basse">Basse</option>
+                                    <option value="normale">Normale</option>
+                                    <option value="haute">Haute</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="tag-filter">Tag</label>
+                            <select id="tag-filter">
+                                <option value="">Tous</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <h3>Trier par</h3>
+                        <div class="filter-buttons" id="sort-options">
+                            <button class="sort-option active" data-sort="createdAt">Date de création</button>
+                            <button class="sort-option" data-sort="dueDate">Date d'échéance</button>
+                            <button class="sort-option" data-sort="priority">Priorité</button>
+                            <button class="sort-option" data-sort="estimate">Temps estimé</button>
+                        </div>
+                        
+                        <h3 style="margin-top: 16px;">Ordre</h3>
+                        <div class="filter-buttons" id="sort-order">
+                            <button class="sort-order active" data-order="desc">Décroissant</button>
+                            <button class="sort-order" data-order="asc">Croissant</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Vue Liste (par défaut) -->
+        <div id="list-view">
+            <ul id="todo-list" class="todo-list">
+                <!-- Les tâches seront insérées ici via JavaScript -->
+            </ul>
+        </div>
+        
+        <!-- Vue Calendrier (masquée par défaut) -->
+        <div id="calendar-view" class="calendar-view" style="display:none;">
+            <div class="calendar-header">
+                <div class="calendar-nav">
+                    <button id="prev-month" class="calendar-nav-btn">◀</button>
+                </div>
+                <div id="calendar-title" class="calendar-title">Février 2023</div>
+                <div class="calendar-nav">
+                    <button id="next-month" class="calendar-nav-btn">▶</button>
+                </div>
+            </div>
+            <div class="calendar-grid" id="calendar-days-header">
+                <div class="calendar-day-header">Lun</div>
+                <div class="calendar-day-header">Mar</div>
+                <div class="calendar-day-header">Mer</div>
+                <div class="calendar-day-header">Jeu</div>
+                <div class="calendar-day-header">Ven</div>
+                <div class="calendar-day-header">Sam</div>
+                <div class="calendar-day-header">Dim</div>
+            </div>
+            <div class="calendar-grid" id="calendar-grid">
+                <!-- Les jours du calendrier seront insérés ici via JavaScript -->
+            </div>
+        </div>
+        
+        <!-- Modal pour l'édition de tâche -->
+        <div id="edit-modal" class="modal-backdrop">
+            <div class="modal">
+                <div class="modal-header">
+                    <div class="modal-title">Modifier la tâche</div>
+                    <button class="modal-close" id="edit-modal-close">×</button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-todo-form">
+                        <div class="form-group">
+                            <label for="edit-todo-text">Titre</label>
+                            <input type="text" id="edit-todo-text" required>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label for="edit-todo-category">Catégorie</label>
+                                <input type="text" id="edit-todo-category" list="categories">
+                            </div>
+                            
+                            <div class="form-col">
+                                <label for="edit-todo-due-date">Date d'échéance</label>
+                                <input type="date" id="edit-todo-due-date">
+                            </div>
+                            
+                            <div class="form-col">
+                                <label for="edit-todo-priority">Priorité</label>
+                                <select id="edit-todo-priority">
+                                    <option value="basse">Basse</option>
+                                    <option value="normale">Normale</option>
+                                    <option value="haute">Haute</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label for="edit-todo-time">Heure</label>
+                                <input type="time" id="edit-todo-time">
+                            </div>
+                            
+                            <div class="form-col">
+                                <label for="edit-todo-estimate">Temps estimé (min)</label>
+                                <input type="number" id="edit-todo-estimate" min="0">
+                            </div>
+                            
+                            <div class="form-col">
+                                <label for="edit-todo-recurrence">Récurrence</label>
+                                <select id="edit-todo-recurrence">
+                                    <option value="none">Aucune</option>
+                                    <option value="daily">Quotidienne</option>
+                                    <option value="weekly">Hebdomadaire</option>
+                                    <option value="monthly">Mensuelle</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Tags</label>
+                            <div id="edit-tags-input" class="tags-input">
+                                <input type="text" id="edit-new-tag" placeholder="Ajouter des tags (appuyez sur Entrée pour ajouter)">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="edit-todo-description">Description</label>
+                            <textarea id="edit-todo-description" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Sous-tâches</label>
+                            <div id="edit-subtasks">
+                                <!-- Les sous-tâches existantes seront insérées ici -->
+                            </div>
+                            <div style="display: flex; margin-top: 8px;">
+                                <input type="text" id="new-subtask" placeholder="Nouvelle sous-tâche...">
+                                <button type="button" id="add-subtask-btn" style="margin-left: 8px;">Ajouter</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Option de synchronisation Google -->
+                        <div class="sync-options">
+                            <input type="checkbox" id="edit-sync-google-checkbox" class="sync-checkbox" disabled>
+                            <label for="edit-sync-google-checkbox" class="sync-label">
+                                Synchroniser avec Google Agenda
+                                <span class="sync-icon">G</span>
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="secondary" id="edit-modal-cancel">Annuler</button>
+                    <button id="edit-modal-save">Enregistrer les modifications</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal d'authentification Google -->
+        <div id="google-auth-modal" class="modal-backdrop google-auth-modal">
+            <div class="modal">
+                <div class="modal-header">
+                    <div class="modal-title">Google Agenda</div>
+                    <button class="modal-close" id="google-auth-close">×</button>
+                </div>
+                <div class="modal-body google-auth-content">
+                    <div class="google-logo">
+                        <span style="color: #DB4437; font-size: 40px;">G</span>
+                    </div>
+                    <div id="google-auth-container">
+                        <!-- Contenu dynamique selon l'état de connexion -->
+                        <h3 class="google-auth-title">Connectez-vous à Google Agenda</h3>
+                        <p class="google-auth-description">
+                            La connexion à Google Agenda vous permet de synchroniser vos tâches et d'y accéder depuis n'importe quel appareil.
+                        </p>
+                        <button id="google-auth-btn" class="google-auth-btn">
+                            <span>Se connecter avec Google</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Section Paramètres de synchronisation (visible quand connecté) -->
+                    <div id="sync-settings" class="sync-settings-section" style="display: none;">
+                        <h3 class="sync-settings-title">Paramètres de synchronisation</h3>
+                        
+                        <div class="sync-setting-row">
+                            <div class="sync-setting-label">
+                                <i>🔄</i>
+                                <span>Synchronisation automatique</span>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="auto-sync-toggle">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="sync-setting-row">
+                            <div class="sync-setting-label">
+                                <i>📆</i>
+                                <span>Calendrier par défaut</span>
+                            </div>
+                            <select id="default-calendar-select">
+                                <option value="">Chargement...</option>
+                            </select>
+                        </div>
+                        
+                        <div class="sync-action-buttons">
+                            <button id="sync-now-btn" class="secondary">Synchroniser maintenant</button>
+                            <button id="google-logout-btn" class="danger">Se déconnecter</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal de résolution des conflits de synchronisation -->
+        <div id="sync-conflict-modal" class="modal-backdrop">
+            <div class="modal">
+                <div class="modal-header">
+                    <div class="modal-title">Résoudre les conflits de synchronisation</div>
+                    <button class="modal-close" id="conflict-modal-close">×</button>
+                </div>
+                <div class="modal-body">
+                    <p>Des modifications ont été détectées à la fois localement et sur Google Agenda. Veuillez choisir la version à conserver pour chaque tâche:</p>
+                    
+                    <div id="conflict-list" class="conflict-list">
+                        <!-- Les conflits seront insérés ici -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="resolve-all-local" class="secondary">Tout garder en local</button>
+                    <button id="resolve-all-remote" class="primary">Tout importer de Google</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal pour la documentation -->
+        <div id="help-modal" class="modal-backdrop help-modal">
+            <div class="modal">
+                <div class="modal-header">
+                    <div class="modal-title">Mode d'emploi - Todo List Pro</div>
+                    <button class="modal-close" id="help-modal-close">×</button>
+                </div>
+                <div class="modal-body help-content">
+                    <section class="toc">
+                        <h2>Table des matières</h2>
+                        <ul>
+                            <li><a href="#" data-section="introduction">Introduction</a></li>
+                            <li><a href="#" data-section="demarrage">Démarrage</a></li>
+                            <li><a href="#" data-section="fonctionnalites">Fonctionnalités principales</a>
+                                <ul>
+                                    <li><a href="#" data-section="ajouter">Ajouter des tâches</a></li>
+                                    <li><a href="#" data-section="gerer">Gérer vos tâches</a></li>
+                                    <li><a href="#" data-section="sous-taches">Sous-tâches</a></li>
+                                    <li><a href="#" data-section="organisation">Organisation et filtres</a></li>
+                                    <li><a href="#" data-section="tri">Tri et vues</a></li>
+                                    <li><a href="#" data-section="theme">Thème et préférences</a></li>
+                                    <li><a href="#" data-section="exportation">Exportation et importation</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="#" data-section="google-calendar">Synchronisation Google Agenda</a>
+                                <ul>
+                                    <li><a href="#" data-section="google-connexion">Connexion à Google</a></li>
+                                    <li><a href="#" data-section="google-sync">Synchronisation des tâches</a></li>
+                                    <li><a href="#" data-section="google-conflicts">Gestion des conflits</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="#" data-section="avancees">Fonctionnalités avancées</a>
+                                <ul>
+                                    <li><a href="#" data-section="recurrentes">Tâches récurrentes</a></li>
+                                    <li><a href="#" data-section="statistiques">Statistiques</a></li>
+                                    <li><a href="#" data-section="calendrier">Vue calendrier</a></li>
+                                    <li><a href="#" data-section="tags">Gestion des tags</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="#" data-section="astuces">Astuces pratiques</a></li>
+                            <li><a href="#" data-section="indicateurs">Aide-mémoire des indicateurs visuels</a></li>
+                        </ul>
+                    </section>
+                    
+                    <section id="introduction">
+                        <h2>Introduction</h2>
+                        <p>Todo List Pro est une application complète de gestion de tâches qui fonctionne dans votre navigateur. Elle vous permet d'organiser vos tâches avec de nombreuses fonctionnalités avancées, dont la synchronisation avec Google Agenda.</p>
+                    </section>
+                    
+                    <section id="demarrage">
+                        <h2>Démarrage</h2>
+                        <ol>
+                            <li><strong>Ouvrir l'application</strong> : Double-cliquez sur le fichier HTML ou ouvrez-le dans votre navigateur préféré.</li>
+                            <li><strong>Sauvegarde des données</strong> : L'application fonctionne en local. Utilisez la fonction "Exporter" pour sauvegarder vos données et "Importer" pour les restaurer.</li>
+                            <li><strong>Synchronisation cloud</strong> : Connectez l'application à Google Agenda pour sauvegarder vos tâches dans le cloud et y accéder sur différents appareils.</li>
+                        </ol>
+                    </section>
+                    
+                    <section id="google-calendar">
+                        <h2>Synchronisation Google Agenda</h2>
+                        
+                        <section id="google-connexion">
+                            <h3>Connexion à Google</h3>
+                            <ol>
+                                <li>Cliquez sur le bouton "Google Agenda" dans la barre d'outils.</li>
+                                <li>Dans la fenêtre qui s'ouvre, cliquez sur "Se connecter avec Google".</li>
+                                <li>Suivez les instructions pour autoriser l'accès à votre compte Google.</li>
+                                <li>Une fois connecté, vous pourrez configurer les paramètres de synchronisation.</li>
+                            </ol>
+                        </section>
+                        
+                        <section id="google-sync">
+                            <h3>Synchronisation des tâches</h3>
+                            <ul>
+                                <li><strong>Synchronisation manuelle</strong> : Cliquez sur "Synchroniser maintenant" dans les paramètres Google pour synchroniser immédiatement toutes les tâches.</li>
+                                <li><strong>Synchronisation automatique</strong> : Activez l'option dans les paramètres pour que les tâches se synchronisent automatiquement.</li>
+                                <li><strong>Tâches individuelles</strong> : Vous pouvez choisir quelles tâches synchroniser en cochant l'option lors de la création ou modification.</li>
+                            </ul>
+                            
+                            <div class="tip">
+                                <strong>Astuce :</strong> Les tâches synchronisées avec Google Agenda sont marquées d'un indicateur "G" dans la liste des tâches et le calendrier.
+                            </div>
+                        </section>
+                        
+                        <section id="google-conflicts">
+                            <h3>Gestion des conflits</h3>
+                            <p>Lorsque des modifications sont effectuées à la fois localement et sur Google Agenda, l'application détecte les conflits et vous propose de les résoudre :</p>
+                            <ul>
+                                <li>Choisissez entre la version locale et la version Google pour chaque tâche en conflit.</li>
+                                <li>Utilisez les boutons "Tout garder en local" ou "Tout importer de Google" pour résoudre rapidement tous les conflits.</li>
+                            </ul>
+                        </section>
+                    </section>
+                    
+                    <section id="fonctionnalites">
+                        <h2>Fonctionnalités principales</h2>
+                        
+                        <div class="feature-grid">
+                            <div class="feature-card" id="ajouter">
+                                <h3><i>➕</i> Ajouter des tâches</h3>
+                                <ul>
+                                    <li><strong>Ajout rapide</strong> : Entrez simplement le titre de votre tâche dans le champ principal et appuyez sur Entrée.</li>
+                                    <li><strong>Ajout détaillé</strong> : Cliquez sur "Plus d'options" pour accéder au formulaire complet avec :</li>
+                                    <ul>
+                                        <li>Catégorie</li>
+                                        <li>Date et heure d'échéance</li>
+                                        <li>Priorité (basse, normale, haute)</li>
+                                        <li>Temps estimé</li>
+                                        <li>Récurrence</li>
+                                        <li>Tags</li>
+                                        <li>Description détaillée</li>
+                                        <li>Synchronisation Google Agenda</li>
+                                    </ul>
+                                </ul>
+                            </div>
+                            
+                            <!-- Autres cartes de fonctionnalités... -->
+                            
+                        </div>
+                    </section>
+                    
+                    <section id="indicateurs">
+                        <h2>Aide-mémoire des indicateurs visuels</h2>
+                        
+                        <p>Pour vous aider à identifier rapidement l'état et la priorité de vos tâches, l'application utilise plusieurs indicateurs visuels :</p>
+                        
+                        <ul>
+                            <li>
+                                <span class="key-indicator">
+                                    <span class="color-indicator red"></span> Bordure rouge
+                                </span>
+                                Tâche en retard
+                            </li>
+                            
+                            <li>
+                                <span class="key-indicator">
+                                    <span class="color-indicator google-color"></span> Indicateur "G"
+                                </span>
+                                Tâche synchronisée avec Google Agenda
+                            </li>
+                            
+                            <!-- Autres indicateurs... -->
+                            
+                        </ul>
+                    </section>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Zone de notification -->
+        <div id="notification" class="notification">
+            <div class="notification-icon">🔔</div>
+            <div class="notification-content">
+                <div class="notification-title" id="notification-title">Titre</div>
+                <div class="notification-message" id="notification-message">Message</div>
+            </div>
+            <button class="notification-close" id="notification-close">×</button>
+        </div>
+        
+        <!-- Pied de page -->
+        <div id="footer" class="footer">
+            <span id="remaining-count">0 tâches restantes</span>
+            <div class="footer-actions">
+                <button id="clear-completed" class="secondary">Supprimer les tâches complétées</button>
+                <button id="clear-all" class="danger">Tout supprimer</button>
+            </div>
+        </div>
+    </div>
+<script src="todo-part2.js"></script>
+<script src="todo-part3.js"></script></body>
+</html>
